@@ -8,11 +8,30 @@ datasource db {
 }
 
 model Item {
-  id        Int      @id @default(autoincrement())
+  id        Int         @id @default(autoincrement())
   title     String
   price     Float
   link      String
   imageUrl  String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+  status    ItemStatus  @default(AVAILABLE)  
+
+  purchases Purchase[]
+}
+
+model Purchase {
+  id          Int      @id @default(autoincrement())
+  buyerName   String
+  buyerPhone  String
+  amount      Float
+  createdAt   DateTime @default(now())
+
+  item        Item     @relation(fields: [itemId], references: [id])
+  itemId      Int
+}
+
+enum ItemStatus {
+  AVAILABLE
+  PURCHASED
 }
