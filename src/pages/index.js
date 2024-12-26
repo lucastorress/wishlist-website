@@ -1,114 +1,74 @@
-import Image from "next/image";
-import { Geist, Geist_Mono } from "next/font/google";
+import Head from 'next/head';
+import 'tailwindcss/tailwind.css';
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
+// Folder Structure:
+// /components
+//   - AdminLogin.js
+//   - AdminPanel.js
+//   - ItemCard.js
+// /pages
+//   - index.js
+//   - admin.js
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
+const mockItems = [
+  { id: 1, title: 'Conjunto de Talheres', price: 150, link: 'https://example.com/talheres' },
+  { id: 2, title: 'Jogo de Toalhas', price: 200, link: 'https://example.com/toalhas' },
+];
 
-export default function Home() {
+const Home = () => {
   return (
-    <div
-      className={`${geistSans.variable} ${geistMono.variable} grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]`}
-    >
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-semibold">
-              src/pages/index.js
-            </code>
-            .
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
-
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
+    <div className="min-h-screen bg-gray-50">
+      <Head>
+        <title>Chá de Casa Nova - Lucas Torres</title>
+      </Head>
+      <header className="bg-pink-500 p-4 text-center text-white font-bold text-xl">
+        Lista de Presentes
+      </header>
+      <main className="p-4">
+        <section className="mb-6 text-center">
+          <h2 className='text-2xl'>
+            Se você é meu amigo, me ajude a mobiliar essa casa. Obrigado.
+          </h2>
+          <p className="text-lg">
+            O chá de casa nova acontecerá em <strong>10 de janeiro de 2025 às 18h</strong>.
+          </p>
+          <p className="text-lg">
+            <strong>Endereço:</strong> Rua Hill de Moraes, 12, Apto. 908B, Fortaleza Sul Residencial, Fortaleza/CE
+          </p>
           <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
+            href="https://www.google.com/maps/place/Fortaleza+Sul+Residencial/@-3.7755385,-38.4785355,19z/data=!3m1!4b1!4m6!3m5!1s0x7c745fbb27700c5:0x3c70de2636b22852!8m2!3d-3.7755398!4d-38.4778918!16s%2Fg%2F11b808fvwk?entry=ttu&g_ep=EgoyMDI0MTIxMS4wIKXMDSoASAFQAw%3D%3D"
             target="_blank"
             rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
+            className="mt-4 inline-block bg-blue-500 text-white px-4 py-2 rounded">
+            Ver no Google Maps
           </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
-        </div>
+        </section>
+        <section>
+          <h2 className="text-xl font-semibold mb-4">Presentes Desejados</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+            {mockItems.map((item) => (
+              <div
+                key={item.id}
+                className="border p-4 rounded bg-white shadow-sm hover:shadow-md">
+                <h3 className="text-lg font-bold">{item.title}</h3>
+                <p>Preço: R${item.price}</p>
+                <a
+                  href={item.link}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-blue-500 hover:underline">
+                  Comprar agora
+                </a>
+              </div>
+            ))}
+          </div>
+        </section>
       </main>
-      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
+      <footer className="bg-gray-200 text-center p-4 mt-8">
+        Desenvolvido por Lucas Torres
       </footer>
     </div>
   );
-}
+};
+
+export default Home;
