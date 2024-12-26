@@ -1,11 +1,6 @@
 import { PrismaClient } from '@prisma/client';
 
 export default async function handler(req, res) {
-  // Exemplo de check de auth a partir de cookie
-  if (!req.headers.cookie?.includes('adminToken=123456')) {
-    return res.status(401).json({ error: 'Not authorized' });
-  }
-
   const prisma = new PrismaClient();
 
   if (req.method === 'GET') {
