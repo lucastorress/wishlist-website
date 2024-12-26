@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
+import { toast } from 'react-hot-toast';
 
 export default function EditItem() {
   const router = useRouter();
@@ -9,21 +10,30 @@ export default function EditItem() {
   const [price, setPrice] = useState('');
   const [link, setLink] = useState('');
   const [imageUrl, setImageUrl] = useState('');
+  const [status, setStatus] = useState('AVAILABLE'); // NOVO
 
   useEffect(() => {
     if (!id) return;
-    // Busca dados do item
-    fetch('/api/items/list?id=' + id)
-      .then(res => res.json())
-      .then(data => {
+    fetchItemData();
+  }, [id]);
+
+  async function fetchItemData() {
+    try {
+      const res = await fetch('/api/items/list?id=' + id);
+      const data = await res.json();
+      if (data && data.items && data.items.length > 0) {
         const item = data.items[0];
         setTitle(item.title);
         setPrice(item.price);
         setLink(item.link);
         setImageUrl(item.imageUrl);
-      })
-      .catch(err => console.error(err));
-  }, [id]);
+        setStatus(item.status); // Seta o status atual
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error("Erro ao carregar dados do item.");
+    }
+  }
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -37,15 +47,18 @@ export default function EditItem() {
           price: parseFloat(price),
           link,
           imageUrl,
+          status, // NOVO -> enviamos o status selecionado
         }),
       });
       if (res.ok) {
+        toast.success("Item atualizado com sucesso!");
         router.push('/admin');
       } else {
-        alert('Erro ao editar item.');
+        toast.error('Erro ao editar item.');
       }
     } catch (err) {
       console.error(err);
+      toast.error("Erro ao editar item.");
     }
   }
 
@@ -90,6 +103,20 @@ export default function EditItem() {
             onChange={(e) => setImageUrl(e.target.value)}
           />
         </div>
+
+        {/* NOVO: seletor de status */}
+        <div>
+          <label className="block mb-1">Status:</label>
+          <select
+            className="border w-full p-2"
+            value={status}
+            onChange={(e) => setStatus(e.target.value)}
+          >
+            <option value="AVAILABLE">AVAILABLE</option>
+            <option value="PURCHASED">PURCHASED</option>
+          </select>
+        </div>
+
         <button
           type="submit"
           className="bg-yellow-500 text-white px-4 py-2 rounded hover:bg-yellow-600"

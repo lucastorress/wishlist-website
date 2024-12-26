@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import InputMask from 'react-input-mask';
 import { toast } from 'react-hot-toast';
 
 export default function ModalCompra({ item, onClose, onPurchaseComplete }) {
@@ -7,16 +6,13 @@ export default function ModalCompra({ item, onClose, onPurchaseComplete }) {
   const [nome, setNome] = useState('');
   const [telefone, setTelefone] = useState('');
 
-  // Ao clicar em "Avançar", apenas vamos para o step 2 (exibe QRCode).
-  // Mas primeiro validamos nome e telefone.
+  // Validação simples
   const handleNext = () => {
     if (!nome.trim()) {
       toast.error("Por favor, preencha o nome.");
       return;
     }
-    // Remove tudo que não for dígito
     const numericPhone = telefone.replace(/\D/g, '');
-    // Exemplo: se for telefone brasileiro, com DDD + 9 dígitos = 11 digitos (ou 10, dependendo da região)
     if (numericPhone.length < 10 || numericPhone.length > 11) {
       toast.error("Telefone inválido. Formato esperado: (XX) XXXXX-XXXX");
       return;
@@ -24,11 +20,10 @@ export default function ModalCompra({ item, onClose, onPurchaseComplete }) {
     setStep(2);
   };
 
-  // Quando fecha, simula o "pagamento efetuado" e chama a API.
+  // Ao clicar em "Fechar" no QRCode
   async function handleClose() {
-    // 1) Monta objeto com os dados
-    const numericPhone = telefone.replace(/\D/g, ''); // só dígitos
     try {
+      const numericPhone = telefone.replace(/\D/g, '');
       const res = await fetch('/api/purchases/create', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -61,8 +56,7 @@ export default function ModalCompra({ item, onClose, onPurchaseComplete }) {
       }}
     >
       <div
-        className="bg-white p-4 rounded shadow w-11/12 sm:w-80" 
-        // w-11/12 para mobile first, e sm:w-80 em telas maiores
+        className="bg-white p-4 rounded shadow w-11/12 sm:w-80"
         onClick={(e) => e.stopPropagation()}
       >
         {step === 1 && (
@@ -82,20 +76,13 @@ export default function ModalCompra({ item, onClose, onPurchaseComplete }) {
             </label>
             <label className="block mb-4">
               Telefone:
-              <InputMask
-                mask="(99) 99999-9999"
-                maskChar=""
+              <input
+                type="text"
                 value={telefone}
                 onChange={(e) => setTelefone(e.target.value)}
-              >
-                {(inputProps) => (
-                  <input
-                    {...inputProps}
-                    className="border w-full p-2 mt-1 focus:outline-none focus:ring-2 focus:ring-blue-200"
-                    placeholder="(XX) XXXXX-XXXX"
-                  />
-                )}
-              </InputMask>
+                className="border w-full p-2 mt-1 focus:outline-none focus:ring-2 focus:ring-blue-200"
+                placeholder="(XX) XXXXX-XXXX"
+              />
             </label>
             <div className="flex justify-end">
               <button

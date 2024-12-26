@@ -64,8 +64,7 @@ export default function AdminDashboard() {
 
       {loading ? (
         <div className="flex justify-center items-center">
-          <ClipLoader color="#36d7b7" size={50} /> 
-          {/* Ajuste cor e tamanho do spinner como preferir */}
+          <ClipLoader color="#36d7b7" size={50} />
         </div>
       ) : (
         <>
@@ -73,58 +72,71 @@ export default function AdminDashboard() {
             <p>Nenhum item cadastrado ainda.</p>
           ) : (
             <div className="overflow-x-auto">
-            <table className="table-auto w-full">
-              <thead>
-                <tr className="bg-gray-200">
-                  <th className="px-4 py-2">ID</th>
-                  <th className="px-4 py-2">Título</th>
-                  <th className="px-4 py-2">Preço</th>
-                  <th className="px-4 py-2">Link</th>
-                  <th className="px-4 py-2">Imagem</th>
-                  <th className="px-4 py-2">Ações</th>
-                </tr>
-              </thead>
-              <tbody>
-                {items.map(item => (
-                  <tr key={item.id}>
-                    <td className="border px-4 py-2">{item.id}</td>
-                    <td className="border px-4 py-2">{item.title}</td>
-                    <td className="border px-4 py-2">{item.price}</td>
-                    <td className="border px-4 py-2">
-                      <a
-                        href={item.link}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="text-blue-600 underline break-all"
-                      >
-                        Ver link
-                      </a>
-                    </td>
-                    <td className="border px-4 py-2">
-                      <img
-                        src={item.imageUrl}
-                        alt={item.title}
-                        className="w-16 h-16 object-cover"
-                      />
-                    </td>
-                    <td className="border px-4 py-2">
-                      <button
-                        onClick={() => Router.push(`/admin/edit/${item.id}`)}
-                        className="bg-yellow-500 text-white px-2 py-1 rounded hover:bg-yellow-600 mr-2"
-                      >
-                        Editar
-                      </button>
-                      <button
-                        onClick={() => handleDelete(item.id)}
-                        className="bg-red-600 text-white px-2 py-1 rounded hover:bg-red-700"
-                      >
-                        Excluir
-                      </button>
-                    </td>
+              <table className="table-auto w-full">
+                <thead>
+                  <tr className="bg-gray-200">
+                    <th className="px-4 py-2">ID</th>
+                    <th className="px-4 py-2">Título</th>
+                    <th className="px-4 py-2">Preço</th>
+                    <th className="px-4 py-2">Link</th>
+                    <th className="px-4 py-2">Imagem</th>
+                    <th className="px-4 py-2">Status</th> {/* NOVO */}
+                    <th className="px-4 py-2">Ações</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {items.map(item => (
+                    <tr key={item.id}>
+                      <td className="border px-4 py-2">{item.id}</td>
+                      <td className="border px-4 py-2">{item.title}</td>
+                      <td className="border px-4 py-2">{item.price}</td>
+                      <td className="border px-4 py-2">
+                        <a
+                          href={item.link}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="text-blue-600 underline break-all"
+                        >
+                          Ver link
+                        </a>
+                      </td>
+                      <td className="border px-4 py-2">
+                        <img
+                          src={item.imageUrl}
+                          alt={item.title}
+                          className="w-16 h-16 object-cover"
+                        />
+                      </td>
+                      <td className="border px-4 py-2">
+                        {/* Exibe 'AVAILABLE' ou 'PURCHASED' */}
+                        <span
+                          className={
+                            item.status === 'AVAILABLE' 
+                              ? 'text-green-600 font-semibold'
+                              : 'text-red-600 font-semibold'
+                          }
+                        >
+                          {item.status}
+                        </span>
+                      </td>
+                      <td className="border px-4 py-2">
+                        <button
+                          onClick={() => Router.push(`/admin/edit/${item.id}`)}
+                          className="bg-yellow-500 text-white px-2 py-1 rounded hover:bg-yellow-600 mr-2"
+                        >
+                          Editar
+                        </button>
+                        <button
+                          onClick={() => handleDelete(item.id)}
+                          className="bg-red-600 text-white px-2 py-1 rounded hover:bg-red-700"
+                        >
+                          Excluir
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
           )}
         </>
