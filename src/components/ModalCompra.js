@@ -4,11 +4,21 @@ export default function ModalCompra({ item, onClose, onPurchaseComplete }) {
   const [step, setStep] = useState(1);
   const [nome, setNome] = useState('');
   const [telefone, setTelefone] = useState('');
-  const [loading, setLoading] = useState(false);
+  
+  // Ao clicar em "Avançar", apenas passamos para a etapa do QRCode (Step 2).
+  // NÃO salvamos nada no banco ainda.
+  const handleNext = () => {
+    if (!nome || !telefone) {
+      alert("Por favor, preencha nome e telefone.");
+      return;
+    }
+    setStep(2);
+  };
 
-  // Função para criar a compra no backend
-  async function createPurchase() {
-    setLoading(true);
+  // Quando o usuário clica em "Fechar" no Step 2:
+  // simulamos a compra associada. Em seguida, fechamos o modal e atualizamos a listagem
+  async function handleClose() {
+    // 1) Faz a requisição para associar a compra
     try {
       const res = await fetch('/api/purchases/create', {
         method: 'POST',
@@ -17,33 +27,21 @@ export default function ModalCompra({ item, onClose, onPurchaseComplete }) {
           itemId: item.id,
           buyerName: nome,
           buyerPhone: telefone,
-          amount: item.price, // ou outro valor
+          amount: item.price, // valor do item
         }),
       });
-
       if (!res.ok) {
         throw new Error('Erro ao criar a compra');
       }
-
-      // Se deu tudo certo, passamos para a próxima etapa
-      setStep(2);
-      // Notifica a pagina principal que houve uma compra, se desejar
-      onPurchaseComplete && onPurchaseComplete(item.id);
+      // 2) Chama callback que avisa a Home para atualizar a lista
+      onPurchaseComplete && onPurchaseComplete();
     } catch (error) {
-      alert(error.message);
-    } finally {
-      setLoading(false);
+      console.error(error);
+      alert("Não foi possível concluir a compra.");
     }
+    // 3) Fecha o modal
+    onClose();
   }
-
-  const handleNext = () => {
-    if (!nome || !telefone) {
-      alert("Por favor, preencha nome e telefone.");
-      return;
-    }
-    // Criar a compra no back-end antes de exibir QRCode
-    createPurchase();
-  };
 
   return (
     <div
@@ -83,11 +81,10 @@ export default function ModalCompra({ item, onClose, onPurchaseComplete }) {
             </label>
             <div className="flex justify-end">
               <button
-                disabled={loading}
                 className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
                 onClick={handleNext}
               >
-                {loading ? 'Processando...' : 'Avançar'}
+                Avançar
               </button>
             </div>
           </div>
@@ -104,14 +101,8 @@ export default function ModalCompra({ item, onClose, onPurchaseComplete }) {
             />
             <div className="flex justify-end mt-4">
               <button
-                className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 mr-2"
-                onClick={() => setStep(1)} // Se quiser voltar
-              >
-                Voltar
-              </button>
-              <button
                 className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600"
-                onClick={onClose}
+                onClick={handleClose}
               >
                 Fechar
               </button>

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import ModalCompra from './ModalCompra';
 
-export default function ItemCard({ item }) {
+export default function ItemCard({ item, onPurchaseComplete }) {
   const [showModal, setShowModal] = useState(false);
 
   const isPurchased = item.status === 'PURCHASED';
@@ -27,15 +27,11 @@ export default function ItemCard({ item }) {
         </button>
       )}
 
-      {showModal && !isPurchased && (
+      {showModal && (
         <ModalCompra
           item={item}
           onClose={() => setShowModal(false)}
-          onPurchaseComplete={() => {
-            // Se quiser alterar algo no front end após a compra
-            // Por ex.: recarregar a página ou remover o botão
-            setShowModal(false);
-          }}
+          onPurchaseComplete={onPurchaseComplete}
         />
       )}
     </div>

@@ -1,19 +1,39 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Layout from '@/components/Layout';
 import ItemCard from '@/components/ItemCard';
-import { PrismaClient } from '@prisma/client';
 
-export async function getServerSideProps() {
-  const prisma = new PrismaClient();
-  const items = await prisma.item.findMany();
-  return {
-    props: {
-      items: JSON.parse(JSON.stringify(items)),
-    },
-  };
-}
+export default function Home() {
+  const [items, setItems] = useState([]);
 
-export default function Home({ items }) {
+  // Buscar itens ao montar o componente
+  useEffect(() => {
+    fetchItems();
+  }, []);
+
+  async function fetchItems() {
+    try {
+      const res = await fetch('/api/items/list');
+      const data = await res.json();
+      if (data.items) {
+        // Ordenar: disponíveis (AVAILABLE) primeiro, depois PURCHASED
+        const orderedItems = data.items.sort((a, b) => {
+          if (a.status === 'AVAILABLE' && b.status === 'PURCHASED') return -1;
+          if (a.status === 'PURCHASED' && b.status === 'AVAILABLE') return 1;
+          return 0;
+        });
+        setItems(orderedItems);
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  }
+
+  // Função para atualizar a lista depois que o usuário fechar o modal 
+  // (após efetivar a compra).
+  function refreshItems() {
+    fetchItems();
+  }
+
   return (
     <Layout>
       <section className="mb-8">
@@ -24,7 +44,6 @@ export default function Home({ items }) {
         <button
           className="mt-2 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
           onClick={() => {
-            // Abre Google Maps numa nova aba
             window.open(
               'https://www.google.com/maps/search/?api=1&query=Rua+Exemplo+123+Bairro+Tal+Cidade+XYZ',
               '_blank'
@@ -39,7 +58,11 @@ export default function Home({ items }) {
         <h2 className="text-xl font-semibold mb-4">Lista de Presentes</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {items.map((item) => (
-            <ItemCard key={item.id} item={item} />
+            <ItemCard 
+              key={item.id} 
+              item={item}
+              onPurchaseComplete={refreshItems} // Passamos a função
+            />
           ))}
         </div>
       </section>

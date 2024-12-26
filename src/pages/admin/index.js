@@ -5,16 +5,19 @@ export default function AdminDashboard() {
   const [items, setItems] = useState([]);
 
   useEffect(() => {
-    // Verifica se está logado
-    // Se não estiver (cookie ausente), redireciona para /admin/login
     fetch('/api/items/list')
       .then(res => {
         if (res.status === 401) {
           Router.push('/admin/login');
+          return null; 
         }
         return res.json();
       })
-      .then(data => setItems(data.items))
+      .then(data => {
+        if (data && Array.isArray(data.items)) {
+          setItems(data.items);
+        }
+      })
       .catch(err => console.error(err));
   }, []);
 
@@ -27,8 +30,8 @@ export default function AdminDashboard() {
       >
         Cadastrar novo item
       </button>
-      
-      {items?.length === 0 ? (
+
+      {(!items || items.length === 0) ? (
         <p>Nenhum item cadastrado ainda.</p>
       ) : (
         <table className="table-auto w-full">
