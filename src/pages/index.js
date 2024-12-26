@@ -45,7 +45,7 @@ export default function Home() {
           className="mt-2 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
           onClick={() => {
             window.open(
-              'https://www.google.com/maps/search/?api=1&query=Rua+Exemplo+123+Bairro+Tal+Cidade+XYZ',
+              'https://www.google.com/maps/place/Fortaleza+Sul+Residencial/@-3.7755385,-38.4785355,19z/data=!3m1!4b1!4m6!3m5!1s0x7c745fbb27700c5:0x3c70de2636b22852!8m2!3d-3.7755398!4d-38.4778918!16s%2Fg%2F11b808fvwk?entry=ttu&g_ep=EgoyMDI0MTIxMS4wIKXMDSoASAFQAw%3D%3D',
               '_blank'
             );
           }}
