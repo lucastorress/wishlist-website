@@ -55,12 +55,20 @@ export default function AdminDashboard() {
   return (
     <div className="p-4">
       <h1 className="text-xl font-bold mb-4">Admin Dashboard</h1>
+      <div className="flex justify-center gap-4">
       <button
         onClick={() => Router.push('/admin/new')}
         className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 mb-4"
       >
         Cadastrar novo item
       </button>
+      <button
+        onClick={() => Router.push('/admin/categories')}
+        className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 mb-4"
+      >
+        Cadastrar nova categoria
+      </button>
+      </div>
 
       {loading ? (
         <div className="flex justify-center items-center">

@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client';
+import prisma from '@/lib/prisma';
 
 export default async function handler(req, res) {
   if (req.method === 'POST') {
@@ -6,15 +6,24 @@ export default async function handler(req, res) {
       return res.status(401).json({ error: 'Not authorized' });
     }
 
-    const { title, price, link, imageUrl } = req.body;
+    const {
+      title,
+      price,
+      installments,
+      link,
+      imageUrl,
+      categoryId,
+    } = req.body;
+
     try {
-      const prisma = new PrismaClient();
       const newItem = await prisma.item.create({
         data: {
           title,
           price,
+          installments,
           link,
           imageUrl,
+          categoryId,
         },
       });
       return res.status(200).json(newItem);

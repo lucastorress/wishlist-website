@@ -1,40 +1,51 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import Layout from '@/components/Layout';
 import ItemCard from '@/components/ItemCard';
+import { PrismaClient } from '@prisma/client';
 
-export default function Home() {
-  const [items, setItems] = useState([]);
-  const [loading, setLoading] = useState(true);
+export async function getServerSideProps() {
+  const prisma = new PrismaClient();
+  const allItems = await prisma.item.findMany({
+    include: { category: true, purchases: true },
+  });
 
-  useEffect(() => {
-    fetchItems();
-  }, []);
+  const itemsWithCalc = allItems.map((item) => {
+    const totalCotasVendidas = item.purchases.reduce(
+      (acc, p) => acc + p.quantity,
+      0
+    );
+    const remainingInstallments = item.installments - totalCotasVendidas;
 
-  async function fetchItems() {
-    try {
-      setLoading(true);
-      const res = await fetch('/api/items/list');
-      const data = await res.json();
-      if (data && data.items) {
-        // Ordenar: disponíveis (AVAILABLE) primeiro, depois PURCHASED
-        const orderedItems = data.items.sort((a, b) => {
-          if (a.status === 'AVAILABLE' && b.status === 'PURCHASED') return -1;
-          if (a.status === 'PURCHASED' && b.status === 'AVAILABLE') return 1;
-          return 0;
-        });
-        setItems(orderedItems);
-      }
-    } catch (error) {
-      console.error(error);
-    } finally {
-      setLoading(false);
+    return {
+      ...item,
+      totalCotasVendidas,
+      remainingInstallments: remainingInstallments < 0 ? 0 : remainingInstallments,
+    };
+  });
+
+  const byCategory = {};
+  itemsWithCalc.forEach((item) => {
+    const catName = item.category?.name || 'Sem categoria';
+    if (!byCategory[catName]) {
+      byCategory[catName] = [];
     }
-  }
+    byCategory[catName].push(item);
+  });
 
-  function refreshItems() {
-    fetchItems();
-  }
+  const totalItems = itemsWithCalc.length;
 
+  // Converter para JSON serializável
+  const safeByCategory = JSON.parse(JSON.stringify(byCategory));
+
+  return {
+    props: {
+      byCategory: safeByCategory,
+      totalItems,
+    },
+  };
+}
+
+export default function Home({ byCategory, totalItems }) {
   return (
     <Layout>
       <section className="mb-8">
@@ -55,25 +66,27 @@ export default function Home() {
         </button>
       </section>
 
-      <section>
-        <h2 className="text-xl font-semibold mb-4">Lista de Presentes</h2>
-        {loading ? (
-          <div className="flex justify-center items-center my-8">
-            {/* Spinner com Tailwind */}
-            <div className="w-12 h-12 border-4 border-blue-400 border-dashed rounded-full animate-spin" />
+      {totalItems === 0 ? (
+        <p className="text-center text-gray-600">
+          Ainda não foram cadastrados itens na lista de presentes.
+        </p>
+      ) : (
+        Object.keys(byCategory).map((catName) => (
+          <div key={catName} className="mb-8">
+            <h3 className="text-xl font-semibold mb-4">{catName}</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {byCategory[catName].map((item) => (
+                <ItemCard
+                  key={item.id}
+                  item={item}
+                  // Se quiser, pode recarregar a página após comprar
+                  onPurchaseComplete={() => window.location.reload()}
+                />
+              ))}
+            </div>
           </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {items.map((item) => (
-              <ItemCard 
-                key={item.id} 
-                item={item}
-                onPurchaseComplete={refreshItems}
-              />
-            ))}
-          </div>
-        )}
-      </section>
+        ))
+      )}
     </Layout>
   );
 }

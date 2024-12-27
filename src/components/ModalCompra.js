@@ -5,8 +5,8 @@ export default function ModalCompra({ item, onClose, onPurchaseComplete }) {
   const [step, setStep] = useState(1);
   const [nome, setNome] = useState('');
   const [telefone, setTelefone] = useState('');
+  const [quantity, setQuantity] = useState(1);
 
-  // Validação simples
   const handleNext = () => {
     if (!nome.trim()) {
       toast.error("Por favor, preencha o nome.");
@@ -17,10 +17,16 @@ export default function ModalCompra({ item, onClose, onPurchaseComplete }) {
       toast.error("Telefone inválido. Formato esperado: (XX) XXXXX-XXXX");
       return;
     }
+    // Validar quantity
+    const qtd = parseInt(quantity);
+    if (qtd < 1 || qtd > item.remainingInstallments) {
+      toast.error(`Você só pode comprar entre 1 e ${item.remainingInstallments} cotas.`);
+      return;
+    }
     setStep(2);
   };
 
-  // Ao clicar em "Fechar" no QRCode
+  // Quando clica em Fechar (passo 2 => QRCode), envia a requisição ao backend
   async function handleClose() {
     try {
       const numericPhone = telefone.replace(/\D/g, '');
@@ -31,7 +37,7 @@ export default function ModalCompra({ item, onClose, onPurchaseComplete }) {
           itemId: item.id,
           buyerName: nome.trim(),
           buyerPhone: numericPhone,
-          amount: item.price,
+          quantity: parseInt(quantity), // cotas compradas
         }),
       });
       if (!res.ok) {
@@ -61,29 +67,41 @@ export default function ModalCompra({ item, onClose, onPurchaseComplete }) {
       >
         {step === 1 && (
           <div>
-            <h2 className="text-xl font-bold mb-2">
-              Dados para compra de {item.title}
-            </h2>
+            <h2 className="text-xl font-bold mb-2">Dados para compra de {item.title}</h2>
             <label className="block mb-2">
               Nome:
               <input
                 type="text"
                 value={nome}
                 onChange={(e) => setNome(e.target.value)}
-                className="border w-full p-2 mt-1 focus:outline-none focus:ring-2 focus:ring-blue-200"
+                className="border w-full p-2 mt-1 focus:outline-none"
                 placeholder="Seu nome"
               />
             </label>
-            <label className="block mb-4">
+            <label className="block mb-2">
               Telefone:
               <input
                 type="text"
                 value={telefone}
                 onChange={(e) => setTelefone(e.target.value)}
-                className="border w-full p-2 mt-1 focus:outline-none focus:ring-2 focus:ring-blue-200"
+                className="border w-full p-2 mt-1 focus:outline-none"
                 placeholder="(XX) XXXXX-XXXX"
               />
             </label>
+            {/* Campo para escolher quantas cotas comprar */}
+            {item.status !== 'PURCHASED' && (
+              <label className="block mb-4">
+                Quantas cotas deseja comprar? (1 - {item.remainingInstallments})
+                <input
+                  type="number"
+                  min={1}
+                  max={item.remainingInstallments}
+                  value={quantity}
+                  onChange={(e) => setQuantity(e.target.value)}
+                  className="border w-full p-2 mt-1 focus:outline-none"
+                />
+              </label>
+            )}
             <div className="flex justify-end">
               <button
                 className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"

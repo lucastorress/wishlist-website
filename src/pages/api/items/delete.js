@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client';
+import prisma from '@/lib/prisma';
 
 export default async function handler(req, res) {
   if (req.method === 'DELETE') {
@@ -8,7 +8,6 @@ export default async function handler(req, res) {
 
     const { id } = req.body;
     try {
-      const prisma = new PrismaClient();
       await prisma.item.delete({ where: { id } });
       return res.status(200).json({ message: 'Item deleted' });
     } catch (error) {

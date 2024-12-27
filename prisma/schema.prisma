@@ -7,31 +7,47 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum ItemStatus {
+  AVAILABLE
+  PURCHASED
+}
+
 model Item {
-  id        Int         @id @default(autoincrement())
-  title     String
-  price     Float
-  link      String
-  imageUrl  String
-  createdAt DateTime    @default(now())
-  updatedAt DateTime    @updatedAt
-  status    ItemStatus  @default(AVAILABLE)  
+  id           Int         @id @default(autoincrement())
+  title        String
+  price        Float
+  installments Int          // ex: 1 a 12
+  status       ItemStatus   @default(AVAILABLE)
+  link         String
+  imageUrl     String
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
 
   purchases Purchase[]
+
+  categoryId Int?
+  category   Category? @relation(fields: [categoryId], references: [id])
 }
 
 model Purchase {
   id          Int      @id @default(autoincrement())
   buyerName   String
   buyerPhone  String
-  amount      Float
+  quantity    Int      // quantas parcelas foram compradas
+  amount      Float    // valor total pago (por ex: quantity * (price/installments))
+
   createdAt   DateTime @default(now())
 
+  // Relação
   item        Item     @relation(fields: [itemId], references: [id])
   itemId      Int
 }
 
-enum ItemStatus {
-  AVAILABLE
-  PURCHASED
+model Category {
+  id    Int    @id @default(autoincrement())
+  name  String
+
+  // Relação 1-N para itens
+  items Item[]
 }
+

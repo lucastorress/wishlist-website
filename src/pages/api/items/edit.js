@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client';
+import prisma from '@/lib/prisma';
 
 export default async function handler(req, res) {
   if (req.method === 'PUT') {
@@ -6,18 +6,19 @@ export default async function handler(req, res) {
       return res.status(401).json({ error: 'Not authorized' });
     }
 
-    const { id, title, price, link, imageUrl, status } = req.body;
+    const { id, title, price, installments, link, imageUrl, status, categoryId } = req.body;
 
     try {
-      const prisma = new PrismaClient();
       const updatedItem = await prisma.item.update({
         where: { id },
         data: {
           title,
           price,
+          installments,
           link,
           imageUrl,
-          status, // NOVO -> atualiza o status
+          status,
+          categoryId,
         },
       });
       return res.status(200).json(updatedItem);

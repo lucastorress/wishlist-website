@@ -1,27 +1,55 @@
-import { PrismaClient } from '@prisma/client';
+import prisma from '@/lib/prisma';
 
 export default async function handler(req, res) {
   if (req.method === 'POST') {
-    const { itemId, buyerName, buyerPhone, amount } = req.body;
+    const { itemId, buyerName, buyerPhone, quantity } = req.body;
 
     try {
-      const prisma = new PrismaClient();
+      // Busca o item
+      const item = await prisma.item.findUnique({
+        where: { id: itemId },
+      });
+      if (!item) {
+        return res.status(404).json({ error: 'Item not found' });
+      }
+      // Se item já está PURCHASED, podemos retornar erro
+      if (item.status === 'PURCHASED') {
+        return res.status(400).json({ error: 'Item já está vendido.' });
+      }
 
-      // Cria o registro da compra
+      // Calcula valor total dessa compra
+      const pricePerInstallment = item.price / item.installments;
+      const amount = pricePerInstallment * quantity;
+
+      // Cria a compra
       const purchase = await prisma.purchase.create({
         data: {
           buyerName,
           buyerPhone,
+          quantity,
           amount,
-          itemId: itemId,
-        }
+          itemId,
+        },
       });
 
-      // Atualiza o status do item para PURCHASED
+      // Soma quantas cotas já foram compradas
+      const result = await prisma.purchase.aggregate({
+        where: { itemId },
+        _sum: { quantity: true },
+      });
+      const totalCotasVendidas = result._sum.quantity || 0;
+
+      // Se já bateu ou excedeu item.installments => marca como PURCHASED
+      let newStatus = 'AVAILABLE';
+      if (totalCotasVendidas >= item.installments) {
+        newStatus = 'PURCHASED';
+      }
+
+      // Atualiza status do item
       await prisma.item.update({
         where: { id: itemId },
         data: {
-          status: 'PURCHASED',
+          status: newStatus,
         },
       });
 
