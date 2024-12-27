@@ -4,7 +4,7 @@ export default function Layout({ children }) {
       {/* Navbar */}
       <header className="bg-blue-500 text-white p-4">
         <div className="max-w-4xl mx-auto">
-          <h1 className="text-2xl font-bold">Chá de Casa Nova - Lucas Torres</h1>
+          <h1 className="text-2xl font-bold">Lista de presentes</h1>
         </div>
       </header>
 
