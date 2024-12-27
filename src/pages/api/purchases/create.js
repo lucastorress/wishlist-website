@@ -33,8 +33,9 @@ export default async function handler(req, res) {
       });
 
       // Soma quantas cotas já foram compradas
+      // Exemplo: soma cotas vendidas
       const result = await prisma.purchase.aggregate({
-        where: { itemId },
+        where: { itemId, active: true }, // conta só as ativas
         _sum: { quantity: true },
       });
       const totalCotasVendidas = result._sum.quantity || 0;

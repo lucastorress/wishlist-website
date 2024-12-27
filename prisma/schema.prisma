@@ -33,15 +33,16 @@ model Purchase {
   id          Int      @id @default(autoincrement())
   buyerName   String
   buyerPhone  String
-  quantity    Int      // quantas parcelas foram compradas
-  amount      Float    // valor total pago (por ex: quantity * (price/installments))
-
+  quantity    Int
+  amount      Float
   createdAt   DateTime @default(now())
 
-  // Relação
+  active      Boolean  @default(true)
+
   item        Item     @relation(fields: [itemId], references: [id])
   itemId      Int
 }
+
 
 model Category {
   id    Int    @id @default(autoincrement())

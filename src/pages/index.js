@@ -5,10 +5,18 @@ import { PrismaClient } from '@prisma/client';
 
 export async function getServerSideProps() {
   const prisma = new PrismaClient();
+
+  // Busca todos os itens, com category e purchases ativas
   const allItems = await prisma.item.findMany({
-    include: { category: true, purchases: true },
+    include: {
+      category: true,
+      purchases: {
+        where: { active: true }, // só conta compras ativas
+      },
+    },
   });
 
+  // Calcula cotas vendidas e remainingInstallments
   const itemsWithCalc = allItems.map((item) => {
     const totalCotasVendidas = item.purchases.reduce(
       (acc, p) => acc + p.quantity,
@@ -23,6 +31,7 @@ export async function getServerSideProps() {
     };
   });
 
+  // Agrupar por categoria
   const byCategory = {};
   itemsWithCalc.forEach((item) => {
     const catName = item.category?.name || 'Sem categoria';
@@ -34,7 +43,7 @@ export async function getServerSideProps() {
 
   const totalItems = itemsWithCalc.length;
 
-  // Converter para JSON serializável
+  // Serializar para evitar erro com Date
   const safeByCategory = JSON.parse(JSON.stringify(byCategory));
 
   return {

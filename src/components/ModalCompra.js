@@ -17,7 +17,7 @@ export default function ModalCompra({ item, onClose, onPurchaseComplete }) {
       toast.error("Telefone inválido. Formato esperado: (XX) XXXXX-XXXX");
       return;
     }
-    // Validar quantity
+    // Valida quantity
     const qtd = parseInt(quantity);
     if (qtd < 1 || qtd > item.remainingInstallments) {
       toast.error(`Você só pode comprar entre 1 e ${item.remainingInstallments} cotas.`);
@@ -26,7 +26,6 @@ export default function ModalCompra({ item, onClose, onPurchaseComplete }) {
     setStep(2);
   };
 
-  // Quando clica em Fechar (passo 2 => QRCode), envia a requisição ao backend
   async function handleClose() {
     try {
       const numericPhone = telefone.replace(/\D/g, '');
@@ -37,7 +36,7 @@ export default function ModalCompra({ item, onClose, onPurchaseComplete }) {
           itemId: item.id,
           buyerName: nome.trim(),
           buyerPhone: numericPhone,
-          quantity: parseInt(quantity), // cotas compradas
+          quantity: parseInt(quantity), // quantas cotas
         }),
       });
       if (!res.ok) {
@@ -67,14 +66,16 @@ export default function ModalCompra({ item, onClose, onPurchaseComplete }) {
       >
         {step === 1 && (
           <div>
-            <h2 className="text-xl font-bold mb-2">Dados para compra de {item.title}</h2>
+            <h2 className="text-xl font-bold mb-2">
+              Dados para compra de {item.title}
+            </h2>
             <label className="block mb-2">
               Nome:
               <input
                 type="text"
                 value={nome}
                 onChange={(e) => setNome(e.target.value)}
-                className="border w-full p-2 mt-1 focus:outline-none"
+                className="border w-full p-2 mt-1"
                 placeholder="Seu nome"
               />
             </label>
@@ -84,24 +85,26 @@ export default function ModalCompra({ item, onClose, onPurchaseComplete }) {
                 type="text"
                 value={telefone}
                 onChange={(e) => setTelefone(e.target.value)}
-                className="border w-full p-2 mt-1 focus:outline-none"
+                className="border w-full p-2 mt-1"
                 placeholder="(XX) XXXXX-XXXX"
               />
             </label>
-            {/* Campo para escolher quantas cotas comprar */}
-            {item.status !== 'PURCHASED' && (
-              <label className="block mb-4">
-                Quantas cotas deseja comprar? (1 - {item.remainingInstallments})
-                <input
-                  type="number"
-                  min={1}
-                  max={item.remainingInstallments}
-                  value={quantity}
-                  onChange={(e) => setQuantity(e.target.value)}
-                  className="border w-full p-2 mt-1 focus:outline-none"
-                />
-              </label>
-            )}
+
+            <label className="block mb-4">
+              Quantas cotas deseja comprar? (1 - {item.remainingInstallments})
+              <select
+                className="border w-full p-2 mt-1"
+                value={quantity}
+                onChange={(e) => setQuantity(e.target.value)}
+              >
+                {Array.from({ length: item.remainingInstallments }, (_, i) => i + 1).map((val) => (
+                  <option key={val} value={val}>
+                    {val}
+                  </option>
+                ))}
+              </select>
+            </label>
+
             <div className="flex justify-end">
               <button
                 className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
@@ -118,7 +121,7 @@ export default function ModalCompra({ item, onClose, onPurchaseComplete }) {
             <h2 className="text-xl font-bold mb-2">Pagamento por PIX</h2>
             <p className="mb-4">Use o QRCode abaixo para pagamento:</p>
             <img
-              src="https://as1.ftcdn.net/v2/jpg/05/94/36/64/500_F_594366491_I3vaOX6ZasBJsZNfuNErXASCcpcsQ1Co.jpg"
+              src="/qrcode-placeholder.png"
               alt="QRCode Mock"
               className="w-48 h-48 mx-auto"
             />
